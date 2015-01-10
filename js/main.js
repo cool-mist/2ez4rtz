@@ -1,6 +1,5 @@
-$("body").keypress(keypress_handler);
+$(document).keypress(keypress_handler);
 function keypress_handler(e){
-
 	if(e.keyCode==97){
 		no();
 		game.state=1;
@@ -9,12 +8,21 @@ function keypress_handler(e){
 		game.state=1;
 	}
 }
-//Game states -- 0 -> waiting for user input  1 -> Calculate and display result 
+$(document).ready(function(){
+	gameend();
+	reinit();
 
-var colors = ['red','blue','yellow','green','gray'];
-var bgcolor = ['white','yellow'];
+	setInterval(function(){GameLoop();},10);
+});
+
+var colors = ['red','blue','yellow','green','gray']; // List of colors currently displayed. more colors can(should) be added :)
+var bgcolor = ['white','white'];
+var modifiers = [inv];
 var max=0;
-//console.log(Math.floor(Math.random()*colors.length));
+//Game states -- 0 -> waiting for user input  1 -> Calculate and display result 
+// user_inp -- 0 -> No 1-> Yes
+// clr -- Color displayed on the screen
+// txt -- Color text displayed on the screen
 var game={
 	score:0,
 	state:0,
@@ -24,8 +32,12 @@ var game={
 }
 var t;    	//timer
 var cw=500; //width of color
-var invert=0,counter=0,range=300;
-function reinit(){
+var invert=0; //Tracks the current control configurations
+var counter=0; // Modifiers are applied whenever counter % range == 0
+var range=300; // range variable for the above
+// Helper functions for the game Loop
+
+function reinit(){                     // Resets timer,displayed color.Displays updated game state
 	
 	clearInterval(t);
 	cw=500;
@@ -39,35 +51,13 @@ function reinit(){
 	console.log(game.clr+","+game.txt);
 
 }
-$(document).ready(function(){
-	gameend();
-	reinit();
 
-	setInterval(function(){start();},10);
-});
-function start(){
-	if(game.state==1){
-		var temp=0;
-		if(game.clr == game.txt) temp=1;
-		if(temp == game.user_inp){  //correct
-			game.score=game.score+1;
-			reinit();
-
-		}else{			
-			gameend();
-
-		}
-		
-		
-	}
-
-}
-function timer(){
-	t=setInterval(function(){
+function timer(){                               // Runs the game timer. A global var counter checks for application of any modifier
+	t=setInterval(function(){					// like inverting controls etc.
 		cw--;
 		counter++;
 		if(counter==range){
-			inv();
+			modifiers[Math.floor(modifiers.length*Math.random())]();	// Calls a random modifier function defined in modifiers array
 			counter=0
 			range=parseInt(Math.random()*100)+350;
 		}
@@ -82,7 +72,7 @@ function timer(){
 	},10);
 }
 
-function gameend(){
+function gameend(){							// Called when game ends. Sets the new Best score if any
 	if(game.score>max){
 		max=game.score;
 	}
@@ -98,7 +88,6 @@ function no(){
 			game.user_inp=1;
 		else
 			game.user_inp=0;
-		
 	}
 }
 function yes(){
@@ -107,11 +96,10 @@ function yes(){
 			game.user_inp=1;
 		else
 			game.user_inp=0;
-		
-		
 	}
 }
-//Extra Features
+
+//Extra Features (functions that come under modifiers)
 function inv(){
 	invert=(invert+1)%2;
 	if(invert){
@@ -122,6 +110,19 @@ function inv(){
 		$("#l").html("L");
 	}
 	$("#legend").fadeOut(100).css("background",bgcolor[invert]).fadeIn(100).fadeOut(100).fadeIn(100);
-		
-	
+}
+
+//The Main GameLoop ..
+function GameLoop(){
+	if(game.state==1){
+		var temp=0;
+		if(game.clr == game.txt) temp=1;
+		if(temp == game.user_inp){  //correct
+			game.score=game.score+1;
+			reinit();
+
+		}else{			
+			gameend();
+		}	
+	}
 }
