@@ -12,6 +12,7 @@ function keypress_handler(e){
 //Game states -- 0 -> waiting for user input  1 -> Calculate and display result 
 
 var colors = ['red','blue','yellow','green','gray'];
+var bgcolor = ['white','yellow'];
 var max=0;
 //console.log(Math.floor(Math.random()*colors.length));
 var game={
@@ -23,7 +24,9 @@ var game={
 }
 var t;    	//timer
 var cw=500; //width of color
+var invert=0,counter=0,range=300;
 function reinit(){
+	
 	clearInterval(t);
 	cw=500;
 	timer();
@@ -39,6 +42,7 @@ function reinit(){
 $(document).ready(function(){
 	gameend();
 	reinit();
+
 	setInterval(function(){start();},10);
 });
 function start(){
@@ -61,6 +65,12 @@ function start(){
 function timer(){
 	t=setInterval(function(){
 		cw--;
+		counter++;
+		if(counter==range){
+			inv();
+			counter=0
+			range=parseInt(Math.random()*100)+350;
+		}
 		if(cw==100){
 			gameend();
 			$("#outer").css("width",'500px');
@@ -71,6 +81,7 @@ function timer(){
 		$("#outer").html(cw-100+'');
 	},10);
 }
+
 function gameend(){
 	if(game.score>max){
 		max=game.score;
@@ -83,13 +94,34 @@ function gameend(){
 // Yes/No functions
 function no(){
 	if(game.state==0){
-		game.user_inp=0;
+		if(invert)
+			game.user_inp=1;
+		else
+			game.user_inp=0;
 		
 	}
 }
 function yes(){
 	if(game.state==0){
-		game.user_inp=1;
+		if(!invert)
+			game.user_inp=1;
+		else
+			game.user_inp=0;
+		
 		
 	}
+}
+//Extra Features
+function inv(){
+	invert=(invert+1)%2;
+	if(invert){
+		$("#a").html("L");
+		$("#l").html("A");
+	}else{
+		$("#a").html("A");
+		$("#l").html("L");
+	}
+	$("#legend").fadeOut(100).css("background",bgcolor[invert]).fadeIn(100).fadeOut(100).fadeIn(100);
+		
+	
 }
